@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hera Health </title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="namePopup">
+        <div id="nameForm">
+            <h2>Welcome to your AI Health Companion</h2>
+            <p>Please enter your name:</p>
+            <input type="text" id="nameInput" placeholder="Your name">
+            <button onclick="setName()">Enter</button>
+        </div>
+    </div>
+    <div class="app-container">
+        <h1>Hera Health </h1>
+        <div id="greeting"></div>
+        <div class="circle-container">
+            <div class="circle" id="stepsCircle" onclick="incrementMetric('steps', 1000)">
+                <span id="steps">0</span>
+                <small>Steps</small>
+            </div>
+            <div class="circle" id="waterCircle" onclick="incrementMetric('water', 1)">
+                <span id="water">0</span>
+                <small>Water (cups)</small>
+            </div>
+            <div class="circle" id="sleepCircle" onclick="incrementMetric('sleep', 0.5)">
+                <span id="sleep">0</span>
+                <small>Sleep (hrs)</small>
+            </div>
+        </div>
+        <p class="instructions">Click on the circles to increase your daily metrics</p>
+        <div id="moodContainer">
+            <h3>How do you feel today?</h3>
+            <div id="moodEmojis">
+                <span onclick="setMood('😄')">😄</span>
+                <span onclick="setMood('😊')">😊</span>
+                <span onclick="setMood('😐')">😐</span>
+                <span onclick="setMood('😔')">😔</span>
+                <span onclick="setMood('😫')">😫</span>
+            </div>
+        </div>
+        <div id="aiRecommendation">
+            AI Recommendation: Loading...
+        </div>
+        <div id="journalPrompt">
+            <p>📝 <a href="journal.html" target="_blank">Journal your day's experience</a></p>
+        </div>
+        <div id="healthScore">
+            Health Score: --
+        </div>
+        <div id="credibilityScore">
+            <h3>Credibility Scores</h3>
+            <div>
+                <p>Fitness Level</p>
+                <div class="score-bar"><div id="fitnessScore" class="score-fill"></div></div>
+            </div>
+            <div>
+                <p>Hydration</p>
+                <div class="score-bar"><div id="hydrationScore" class="score-fill"></div></div>
+            </div>
+            <div>
+                <p>Sleep Quality</p>
+                <div class="score-bar"><div id="sleepScore" class="score-fill"></div></div>
+            </div>
+        </div>
+        <div id="weeklyChallenge">
+            <h3>Weekly Health Challenge</h3>
+            <p id="challengeDescription">Take 10,000 steps every day this week!</p>
+            <div id="challengeProgress">
+                <div id="challengeBar"></div>
+            </div>
+            <p id="challengeStatus">Progress: 0%</p>
+        </div>
+    </div>
+    <canvas id="confetti"></canvas>
+
+    <script>
+       let mood = null;
+        const metrics = {steps: 0, water: 0, sleep: 0};
+        let challengeProgress = 0;
+        let userName = '';
+
+        function setName() {
+            userName = document.getElementById('nameInput').value;
+            if (userName) {
+                document.getElementById('namePopup').style.display = 'none';
+                document.getElementById('greeting').textContent = `Hi ${userName} 😊`;
+            }
+        }
+
+        function incrementMetric(metric, increment) {
+            metrics[metric] += increment;
+            document.getElementById(metric).textContent = metrics[metric];
+            updateAIRecommendation();
+            updateChallengeProgress();
+            updateCredibilityScores();
+        }
+
+        function setMood(emoji) {
+            mood = emoji;
+            updateAIRecommendation();
+        }
+
+        function updateAIRecommendation() {
+            let recommendation = "Based on your data, here are some recommendations:\n";
+            if (metrics.steps < 5000) recommendation += "- Try to increase your daily steps.\n";
+            if (metrics.water < 8) recommendation += "- Drink more water throughout the day.\n";
+            if (metrics.sleep < 7) recommendation += "- Aim for 7-9 hours of sleep per night.\n";
+            if (mood === '😔' || mood === '😫') recommendation += "- Consider engaging in mood-boosting activities.\n";
+            
+            document.getElementById('aiRecommendation').textContent = recommendation;
+            
+            const healthScore = calculateHealthScore();
+            document.getElementById('healthScore').textContent = `Health Score: ${healthScore}%`;
+            
+            if (healthScore === 100) {
+                startConfetti();
+            }
+        }
+
+        function calculateHealthScore() {
+            const stepScore = Math.min(metrics.steps / 10000 * 100, 100);
+            const waterScore = Math.min(metrics.water / 8 * 100, 100);
+            const sleepScore = metrics.sleep >= 7 && metrics.sleep <= 9 ? 100 : (metrics.sleep / 8 * 100);
+            const moodScore = mood ? ['😫', '😔', '😐', '😊', '😄'].indexOf(mood) * 25 : 0;
+            
+            return Math.min(Math.round((stepScore + waterScore + sleepScore + moodScore) / 4), 100);
+        }
+
+        function updateChallengeProgress() {
+            challengeProgress = Math.min((metrics.steps / 10000) * 100, 100);
+            document.getElementById('challengeBar').style.width = `${challengeProgress}%`;
+            document.getElementById('challengeStatus').textContent = `Progress: ${Math.round(challengeProgress)}%`;
+            
+            if (challengeProgress === 100) {
+                document.getElementById('challengeDescription').textContent = "Congratulations! You've completed the challenge!";
+                document.getElementById('challengeDescription').style.color = '#4CAF50';
+                startConfetti();
+            }
+        }
+
+        function updateCredibilityScores() {
+            const fitnessScore = Math.min(metrics.steps / 10000 * 100, 100);
+            const hydrationScore = Math.min(metrics.water / 8 * 100, 100);
+            const sleepScore = metrics.sleep >= 7 && metrics.sleep <= 9 ? 100 : (metrics.sleep / 8 * 100);
+
+            document.getElementById('fitnessScore').style.width = `${fitnessScore}%`;
+            document.getElementById('hydrationScore').style.width = `${hydrationScore}%`;
+            document.getElementById('sleepScore').style.width = `${sleepScore}%`;
+        }
+
+        function startConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const pieces = [];
+            const numberOfPieces = 200;
+            const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
+
+            for (let i = 0; i < numberOfPieces; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    rot: Math.random() * 360,
+                    sp: Math.random() * 6 + 3,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                pieces.forEach((p) => {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.translate(p.x + 10, p.y + 10);
+                    ctx.rotate(p.rot * Math.PI / 180);
+                    ctx.rect(-10, -10, 20, 20);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                    ctx.restore();
+
+                    p.y += p.sp;
+                    p.rot += 2;
+
+                    if (p.y > canvas.height) {
+                        p.y = -20;
+                        p.x = Math.random() * canvas.width;
+                    }
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+
+            setTimeout(() => {
+                canvas.style.display = 'none';
+            }, 5000);
+        }
+
+        updateCredibilityScores();
+    </script>
+</body>
+</html>
