@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journalist</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .journal-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+        }
+        #journalCard {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 300px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            line-height: 1.6;
+            resize: vertical;
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        input[type="color"] {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        label {
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+        }
+        .color-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="journal-container">
+        <h1>Journal Your Day</h1>
+        <div id="journalCard" contenteditable="true">
+            Dear Diary,
+
+            Today was...
+        </div>
+        <div class="controls">
+            <div class="color-control">
+                <label for="bgColor">Background:</label>
+                <input type="color" id="bgColor" value="#f9f9f9" onchange="changeBackgroundColor()">
+            </div>
+            <div class="color-control">
+                <label for="textColor">Text:</label>
+                <input type="color" id="textColor" value="#000000" onchange="changeTextColor()">
+            </div>
+            <button onclick="downloadJournal()">Download Journal</button>
+        </div>
+    </div>
+
+    <script>
+        function changeBackgroundColor() {
+            const color = document.getElementById('bgColor').value;
+            document.getElementById('journalCard').style.backgroundColor = color;
+        }
+
+        function changeTextColor() {
+            const color = document.getElementById('textColor').value;
+            document.getElementById('journalCard').style.color = color;
+        }
+
+        function downloadJournal() {
+            const text = document.getElementById('journalCard').innerText;
+            const blob = new Blob([text], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'journal_entry.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
